@@ -1,0 +1,16 @@
+# Local/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Dependency/build folders
+node_modules/
+dist/
+build/
+
+# Local preview helper
+local-preview-server.js
+
+# Source workspace copy kept locally during iteration
+varolgame/
+
