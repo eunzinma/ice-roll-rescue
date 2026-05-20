@@ -30,9 +30,8 @@
     html,
     body {
       width: 100%;
-      height: 100%;
-      min-height: 100vh;
-      min-height: 100svh;
+      height: var(--app-height, 100vh);
+      min-height: var(--app-height, 100vh);
       margin: 0;
       overflow: hidden;
       overscroll-behavior: none;
@@ -67,10 +66,9 @@
 
     .phone {
       position: relative;
-      width: min(100%, calc(100svh * 9 / 16));
-      height: min(100%, calc(100vw * 16 / 9));
+      width: min(100vw, calc(var(--app-height, 100vh) * 9 / 16));
+      height: min(var(--app-height, 100vh), calc(100vw * 16 / 9));
       max-width: 460px;
-      max-height: 920px;
       overflow: hidden;
       background:
         radial-gradient(circle at 50% 16%, rgba(255, 255, 255, .9), transparent 32%),
@@ -85,12 +83,13 @@
     @supports (height: 100dvh) {
       html,
       body {
-        min-height: 100dvh;
+        height: var(--app-height, 100dvh);
+        min-height: var(--app-height, 100dvh);
       }
 
       .phone {
-        width: min(100%, calc(100dvh * 9 / 16));
-        height: min(100%, calc(100vw * 16 / 9));
+        width: min(100vw, calc(var(--app-height, 100dvh) * 9 / 16));
+        height: min(var(--app-height, 100dvh), calc(100vw * 16 / 9));
       }
     }
 
@@ -192,7 +191,7 @@
       left: 0;
       width: 100%;
       transform: none;
-      top: max(18px, env(safe-area-inset-top));
+      top: max(14px, env(safe-area-inset-top));
       text-align: center;
     }
 
@@ -200,7 +199,7 @@
       left: 0;
       width: 100%;
       transform: none;
-      bottom: max(8px, env(safe-area-inset-bottom));
+      bottom: max(14px, env(safe-area-inset-bottom));
       opacity: .75;
       text-align: center;
     }
@@ -1006,7 +1005,7 @@
     .start-actions {
       position: absolute;
       left: 50%;
-      bottom: max(54px, calc(env(safe-area-inset-bottom) + 48px));
+      bottom: max(70px, calc(env(safe-area-inset-bottom) + 62px));
       display: grid;
       gap: 4px;
       justify-items: center;
@@ -1565,10 +1564,12 @@
           artCharacter.setAttribute("transform", "translate(" + pose.x + " " + pose.y + ") scale(" + pose.scale + ")");
         }
         if (characterAsset && characterLayer.classList.contains("has-image")) {
-          const width = 390 * pose.scale;
-          characterAsset.style.width = width + "px";
-          characterAsset.style.left = pose.x + "px";
-          characterAsset.style.top = (pose.y + 6) + "px";
+          const widthPercent = ((390 * pose.scale) / BASE_W) * 100;
+          const leftPercent = (pose.x / BASE_W) * 100;
+          const topPercent = ((pose.y + 6) / BASE_H) * 100;
+          characterAsset.style.width = widthPercent + "%";
+          characterAsset.style.left = leftPercent + "%";
+          characterAsset.style.top = topPercent + "%";
           characterAsset.style.transform = "translate(-50%, -50%)";
         }
       }
@@ -1760,6 +1761,13 @@
         canvas.width = Math.round(BASE_W * dpr);
         canvas.height = Math.round(BASE_H * dpr);
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        updateViewportSize();
+        updateCharacterPose();
+      }
+
+      function updateViewportSize() {
+        const height = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        document.documentElement.style.setProperty("--app-height", Math.max(560, Math.round(height)) + "px");
       }
 
       function getCanvasPoint(event) {
