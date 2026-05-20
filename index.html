@@ -224,6 +224,10 @@
       pointer-events: none;
     }
 
+    .screen:not(.hidden) {
+      pointer-events: auto;
+    }
+
     .panel {
       width: 100%;
       display: grid;
@@ -238,6 +242,7 @@
       height: auto;
       display: block;
       margin-top: -48px;
+      transform: translateX(-4%);
       filter: drop-shadow(0 14px 24px rgba(62, 120, 232, .22));
     }
 
@@ -1006,12 +1011,13 @@
       position: absolute;
       left: 50%;
       bottom: max(70px, calc(env(safe-area-inset-bottom) + 62px));
+      z-index: 8;
       display: grid;
       gap: 4px;
       justify-items: center;
       transform: translateX(-50%);
       width: 100%;
-      pointer-events: none;
+      pointer-events: auto;
     }
 
     .start-actions .primary,
@@ -1454,11 +1460,11 @@
       const storageKey = "varol-ice-roll-best";
 
       const targetsTemplate = [
-        { type: "heat", label: "left cheek heat", fx: -62, fy: 56, radius: 38, value: 100, completed: false },
-        { type: "heat", label: "right cheek heat", fx: 46, fy: 56, radius: 38, value: 100, completed: false },
-        { type: "heat", label: "forehead heat", fx: -8, fy: -52, radius: 36, value: 100, completed: false },
-        { type: "puff", label: "left eye puff", fx: -56, fy: 20, radius: 29, value: 100, completed: false },
-        { type: "puff", label: "right eye puff", fx: 40, fy: 20, radius: 29, value: 100, completed: false }
+        { type: "heat", label: "left cheek heat", fx: -46, fy: 28, radius: 34, value: 100, completed: false },
+        { type: "heat", label: "right cheek heat", fx: 38, fy: 28, radius: 34, value: 100, completed: false },
+        { type: "heat", label: "forehead heat", fx: -4, fy: -70, radius: 31, value: 100, completed: false },
+        { type: "puff", label: "left eye puff", fx: -48, fy: -4, radius: 25, value: 100, completed: false },
+        { type: "puff", label: "right eye puff", fx: 38, fy: -4, radius: 25, value: 100, completed: false }
       ];
 
       const game = {
@@ -1625,7 +1631,7 @@
       }
 
       function bindTap(element, handler) {
-        let touchHandled = false;
+        let lastTap = 0;
         const run = event => {
           if (event) {
             event.preventDefault();
@@ -1633,14 +1639,18 @@
           }
           handler(event);
         };
-        element.addEventListener("touchend", event => {
-          touchHandled = true;
+        const guardedRun = event => {
+          const now = performance.now();
+          if (now - lastTap < 360) return;
+          lastTap = now;
           run(event);
-          window.setTimeout(() => { touchHandled = false; }, 420);
+        };
+        element.addEventListener("pointerup", guardedRun, { passive: false });
+        element.addEventListener("touchend", event => {
+          guardedRun(event);
         }, { passive: false });
         element.addEventListener("click", event => {
-          if (touchHandled) return;
-          run(event);
+          guardedRun(event);
         });
       }
 
