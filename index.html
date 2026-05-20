@@ -1623,6 +1623,26 @@
         productLayer.classList.add("hidden");
       }
 
+      function bindTap(element, handler) {
+        let touchHandled = false;
+        const run = event => {
+          if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          handler(event);
+        };
+        element.addEventListener("touchend", event => {
+          touchHandled = true;
+          run(event);
+          window.setTimeout(() => { touchHandled = false; }, 420);
+        }, { passive: false });
+        element.addEventListener("click", event => {
+          if (touchHandled) return;
+          run(event);
+        });
+      }
+
       function restartFromResult(event) {
         if (event) {
           event.preventDefault();
@@ -2727,31 +2747,31 @@
         }
       }
 
-      document.getElementById("startButton").addEventListener("click", startTutorial);
-      document.getElementById("playButton").addEventListener("click", startPlaying);
-      pauseButton.addEventListener("click", pauseGame);
-      resumeButton.addEventListener("click", resumeGame);
-      restartButton.addEventListener("click", () => {
+      bindTap(document.getElementById("startButton"), startTutorial);
+      bindTap(document.getElementById("playButton"), startPlaying);
+      bindTap(pauseButton, pauseGame);
+      bindTap(resumeButton, resumeGame);
+      bindTap(restartButton, () => {
         resetGame();
         setScreen("playing");
       });
-      soundButton.addEventListener("click", () => {
+      bindTap(soundButton, () => {
         game.soundEnabled = !game.soundEnabled;
         if (!game.soundEnabled) stopRollingHum();
         updateSoundButton();
       });
-      bestButton.addEventListener("click", () => {
+      bindTap(bestButton, () => {
         comboEl.textContent = "Best Score " + game.bestScore;
         game.comboClock = 1.2;
       });
       const againButton = document.getElementById("againButton");
-      againButton.addEventListener("click", restartFromResult);
-      againButton.addEventListener("touchend", restartFromResult, { passive: false });
-      document.getElementById("shareButton").addEventListener("click", shareResult);
-      document.getElementById("productButton").addEventListener("click", () => {
+      bindTap(againButton, restartFromResult);
+      bindTap(document.getElementById("shareButton"), shareResult);
+      bindTap(document.getElementById("productButton"), () => {
+        if (game.state !== "result") return;
         window.location.href = "https://www.amazon.com/-/ko/dp/B0DJFRX5S9/?_encoding=UTF8&pd_rd_w=8QtMf&content-id=amzn1.sym.a6dce754-9901-41a6-a629-a32800521c61%3Aamzn1.symc.5a16118f-86f0-44cd-8e3e-6c5f82df43d0&pf_rd_p=a6dce754-9901-41a6-a629-a32800521c61&pf_rd_r=8KQJ9NANKHC96708WHGM&pd_rd_wg=tblbF&pd_rd_r=71de57b2-c779-477a-b57b-c14337669ec6&ref_=pd_hp_d_atf_ci_mcx_mr_&th=1";
       });
-      closeProductButton.addEventListener("click", hideProductPanel);
+      bindTap(closeProductButton, hideProductPanel);
       productLayer.addEventListener("click", event => {
         if (event.target === productLayer) hideProductPanel();
       });
@@ -2761,12 +2781,11 @@
         window.addEventListener("pointermove", pointerMove, { passive: false });
         window.addEventListener("pointerup", pointerEnd);
         window.addEventListener("pointercancel", pointerEnd);
-      } else {
-        phone.addEventListener("touchstart", pointerStart, { passive: false });
-        window.addEventListener("touchmove", pointerMove, { passive: false });
-        window.addEventListener("touchend", pointerEnd);
-        window.addEventListener("touchcancel", pointerEnd);
       }
+      phone.addEventListener("touchstart", pointerStart, { passive: false });
+      window.addEventListener("touchmove", pointerMove, { passive: false });
+      window.addEventListener("touchend", pointerEnd);
+      window.addEventListener("touchcancel", pointerEnd);
 
       window.addEventListener("resize", resizeCanvas);
       if (window.visualViewport) window.visualViewport.addEventListener("resize", resizeCanvas);
