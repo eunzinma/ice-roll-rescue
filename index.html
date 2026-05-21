@@ -113,6 +113,11 @@
       display: block;
       touch-action: none;
       z-index: 2;
+      pointer-events: none;
+    }
+
+    .phone[data-screen="playing"] canvas {
+      pointer-events: auto;
     }
 
     .character-layer {
@@ -353,6 +358,8 @@
     .primary,
     .secondary {
       pointer-events: auto;
+      position: relative;
+      z-index: 12;
       border: 0;
       font: inherit;
       border-radius: 999px;
@@ -362,6 +369,9 @@
       font-weight: 950;
       letter-spacing: .02em;
       touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
       transition: transform .14s ease, filter .14s ease, box-shadow .14s ease;
     }
 
@@ -448,11 +458,14 @@
     }
 
     .tutorial-card {
+      position: relative;
+      z-index: 9;
       width: min(336px, 88vw);
       display: grid;
       gap: 12px;
       justify-items: center;
       margin-top: max(42px, env(safe-area-inset-top));
+      pointer-events: auto;
     }
 
     .glass-card {
@@ -1689,13 +1702,43 @@
           lastTap = now;
           run(event);
         };
-        element.addEventListener("pointerup", guardedRun, { passive: false });
-        element.addEventListener("touchend", event => {
-          guardedRun(event);
-        }, { passive: false });
-        element.addEventListener("click", event => {
-          guardedRun(event);
+        element.addEventListener("pointerdown", guardedRun, { passive: false });
+        element.addEventListener("touchstart", guardedRun, { passive: false });
+        element.addEventListener("click", guardedRun);
+        element.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") guardedRun(event);
         });
+      }
+
+      function bindExpandedTap(element, handler, options = {}) {
+        bindTap(element, handler);
+        const top = options.top || 0;
+        const right = options.right || 0;
+        const bottom = options.bottom || 0;
+        const left = options.left || 0;
+        const area = options.area || element.parentElement;
+        if (!area) return;
+        let lastExpandedTap = 0;
+        const runIfInside = event => {
+          if (!event) return;
+          if (event.target && event.target.closest && event.target.closest("button")) return;
+          const touch = event.touches ? event.touches[0] : event.changedTouches ? event.changedTouches[0] : event;
+          const rect = element.getBoundingClientRect();
+          const inside =
+            touch.clientX >= rect.left - left &&
+            touch.clientX <= rect.right + right &&
+            touch.clientY >= rect.top - top &&
+            touch.clientY <= rect.bottom + bottom;
+          if (!inside) return;
+          const now = performance.now();
+          if (now - lastExpandedTap < 360) return;
+          lastExpandedTap = now;
+          event.preventDefault();
+          event.stopPropagation();
+          handler(event);
+        };
+        area.addEventListener("pointerdown", runIfInside, { passive: false });
+        area.addEventListener("touchstart", runIfInside, { passive: false });
       }
 
       function restartFromResult(event) {
@@ -2825,8 +2868,20 @@
         }
       }
 
-      bindTap(document.getElementById("startButton"), startTutorial);
-      bindTap(document.getElementById("playButton"), startPlaying);
+      bindExpandedTap(document.getElementById("startButton"), startTutorial, {
+        area: startScreen,
+        top: 26,
+        right: 24,
+        bottom: 18,
+        left: 24
+      });
+      bindExpandedTap(document.getElementById("playButton"), startPlaying, {
+        area: tutorialScreen,
+        top: 22,
+        right: 22,
+        bottom: 18,
+        left: 22
+      });
       bindTap(pauseButton, pauseGame);
       bindTap(resumeButton, resumeGame);
       bindTap(restartButton, () => {
@@ -2878,6 +2933,7 @@
       document.addEventListener("selectstart", event => event.preventDefault());
       document.addEventListener("gesturestart", event => event.preventDefault());
       resetTargets();
+      phone.dataset.screen = game.state;
       resizeCanvas();
       updateCharacterPose();
       updateBestButton();
