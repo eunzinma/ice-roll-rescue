@@ -1077,58 +1077,33 @@
 
     .how-title-clean {
       position: relative;
-      width: min(318px, 84vw);
-      margin: 6px 0 4px;
-      color: #fafdff;
-      font-family: "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;
-      font-size: clamp(50px, 14.5vw, 72px);
-      line-height: .78;
-      font-weight: 1000;
-      letter-spacing: -.01em;
+      width: min(330px, 86vw);
+      margin: 12px 0 10px;
+      color: #1552b2;
+      font-family: "Trebuchet MS", Arial, system-ui, sans-serif;
+      font-size: clamp(40px, 11vw, 54px);
+      line-height: .92;
+      font-weight: 950;
+      letter-spacing: .01em;
       text-align: center;
-      transform: rotate(-1deg);
-      -webkit-text-stroke: 2.5px #4f95fb;
-      text-shadow:
-        0 1px 0 #ffffff,
-        0 3px 0 #bce9ff,
-        0 6px 0 #5ca2ff,
-        0 10px 0 #2f72df,
-        0 13px 18px rgba(28, 93, 205, .28),
-        0 0 22px rgba(190, 239, 255, .92);
+      text-shadow: 0 2px 0 rgba(255,255,255,.82);
+      filter: none;
     }
 
     .how-title-clean span {
-      position: relative;
       display: inline-block;
-      padding: 0 .04em;
-      border-radius: .28em;
+      padding: 0;
+      color: inherit;
+      -webkit-text-stroke: 0;
+      text-shadow: inherit;
     }
 
     .how-title-clean span::before {
-      content: "";
-      position: absolute;
-      left: 18%;
-      right: 18%;
-      top: 13%;
-      height: 18%;
-      border-radius: 999px;
-      background: linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,0));
-      filter: blur(.2px);
-      pointer-events: none;
+      content: none;
     }
 
     .how-title-clean::after {
-      content: "";
-      position: absolute;
-      left: 50%;
-      bottom: -13px;
-      width: 72%;
-      height: 16px;
-      transform: translateX(-50%);
-      border-radius: 999px;
-      background: linear-gradient(90deg, rgba(255,255,255,0), rgba(135,211,255,.62), rgba(255,255,255,0));
-      filter: blur(2px);
-      pointer-events: none;
+      content: none;
     }
 
     .tutorial-card > .copy {
@@ -1163,13 +1138,15 @@
       display: grid;
       gap: 6px;
       justify-items: center;
-      color: #1047a5;
+      color: #1552b2;
+      font-family: "Trebuchet MS", Arial, system-ui, sans-serif;
       font-size: 12px;
-      font-weight: 950;
+      font-weight: 900;
       line-height: 1;
-      letter-spacing: .06em;
+      letter-spacing: .04em;
       text-transform: uppercase;
-      text-shadow: 0 2px 0 rgba(255,255,255,.95), 0 8px 14px rgba(79, 135, 244, .18);
+      -webkit-text-stroke: 0;
+      text-shadow: 0 1px 0 rgba(255,255,255,.86);
     }
 
     .step-icon {
@@ -1258,6 +1235,7 @@
 </head>
 <body>
   <main class="phone" aria-label="Ice Roll Rescue game">
+    <audio id="bgmAudio" src="assets/sounds/bgm.wav" preload="auto" loop playsinline></audio>
     <canvas id="game" width="390" height="844"></canvas>
     <div class="character-layer has-image" aria-hidden="true">
       <img id="characterAsset" class="character-image" src="assets/characters/varol_face_mobile.png?v=20260515-mobile" alt="" decoding="async" draggable="false" fetchpriority="high">
@@ -1516,6 +1494,7 @@
       const closeProductButton = document.getElementById("closeProductButton");
       const soundButton = document.getElementById("soundButton");
       const bestButton = document.getElementById("bestButton");
+      const bgmAudio = document.getElementById("bgmAudio");
       const storageKey = "varol-ice-roll-best";
 
       const targetsTemplate = [
@@ -1580,6 +1559,10 @@
       let audioCtx = null;
       let rollingOsc = null;
       let rollingGain = null;
+
+      if (bgmAudio) {
+        bgmAudio.volume = .22;
+      }
 
       function resetTargets() {
         game.targets = targetsTemplate.map(target => ({ ...target, effectAmount: 0 }));
@@ -1670,6 +1653,7 @@
         game.paused = true;
         roller.active = false;
         stopRollingHum();
+        pauseBgm();
         pauseLayer.classList.remove("hidden");
       }
 
@@ -1678,6 +1662,7 @@
         game.paused = false;
         game.lastTime = performance.now();
         pauseLayer.classList.add("hidden");
+        playBgm();
       }
 
       function showProductPanel() {
@@ -1724,6 +1709,7 @@
 
       function startTutorial() {
         unlockAudio();
+        playBgm();
         setScreen("tutorial");
         setTimeout(() => {
           if (game.state === "tutorial") startPlaying();
@@ -1733,6 +1719,7 @@
       function startPlaying() {
         resetGame();
         unlockAudio();
+        playBgm();
         setScreen("playing");
       }
 
@@ -1756,6 +1743,7 @@
         bestScoreResultEl.textContent = "0";
         showShareNotice("");
         setScreen("result");
+        playBgm();
         animateScore(coolingScoreEl, cooling, 520, 0);
         animateScore(depuffScoreEl, depuff, 620, 90);
         animateScore(finalScoreEl, finalScore, 720, 180);
@@ -2735,6 +2723,19 @@
         if (audioCtx.state === "suspended") audioCtx.resume();
       }
 
+      function playBgm() {
+        if (!game.soundEnabled || !bgmAudio) return;
+        bgmAudio.volume = .22;
+        const playPromise = bgmAudio.play();
+        if (playPromise && typeof playPromise.catch === "function") {
+          playPromise.catch(() => {});
+        }
+      }
+
+      function pauseBgm() {
+        if (bgmAudio) bgmAudio.pause();
+      }
+
       function startRollingHum() {
         if (!game.soundEnabled || !audioCtx || rollingOsc) return;
         rollingOsc = audioCtx.createOscillator();
@@ -2834,7 +2835,13 @@
       });
       bindTap(soundButton, () => {
         game.soundEnabled = !game.soundEnabled;
-        if (!game.soundEnabled) stopRollingHum();
+        if (!game.soundEnabled) {
+          stopRollingHum();
+          pauseBgm();
+        } else {
+          unlockAudio();
+          playBgm();
+        }
         updateSoundButton();
       });
       bindTap(bestButton, () => {
