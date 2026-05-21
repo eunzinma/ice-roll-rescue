@@ -1078,33 +1078,56 @@
     .how-title-clean {
       position: relative;
       width: min(318px, 84vw);
-      margin: 8px 0 2px;
-      color: #ffffff;
+      margin: 6px 0 4px;
+      color: #fafdff;
       font-family: "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;
-      font-size: clamp(48px, 14vw, 68px);
-      line-height: .86;
+      font-size: clamp(50px, 14.5vw, 72px);
+      line-height: .78;
       font-weight: 1000;
-      letter-spacing: .01em;
+      letter-spacing: -.01em;
       text-align: center;
-      -webkit-text-stroke: 2px #63a8ff;
+      transform: rotate(-1deg);
+      -webkit-text-stroke: 2.5px #4f95fb;
       text-shadow:
-        0 2px 0 #bfe8ff,
-        0 5px 0 #3f82ed,
-        0 9px 14px rgba(36, 104, 218, .28),
-        0 0 18px rgba(191, 239, 255, .9);
+        0 1px 0 #ffffff,
+        0 3px 0 #bce9ff,
+        0 6px 0 #5ca2ff,
+        0 10px 0 #2f72df,
+        0 13px 18px rgba(28, 93, 205, .28),
+        0 0 22px rgba(190, 239, 255, .92);
+    }
+
+    .how-title-clean span {
+      position: relative;
+      display: inline-block;
+      padding: 0 .04em;
+      border-radius: .28em;
+    }
+
+    .how-title-clean span::before {
+      content: "";
+      position: absolute;
+      left: 18%;
+      right: 18%;
+      top: 13%;
+      height: 18%;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,0));
+      filter: blur(.2px);
+      pointer-events: none;
     }
 
     .how-title-clean::after {
       content: "";
       position: absolute;
       left: 50%;
-      bottom: -10px;
-      width: 76%;
-      height: 13px;
+      bottom: -13px;
+      width: 72%;
+      height: 16px;
       transform: translateX(-50%);
       border-radius: 999px;
-      background: linear-gradient(90deg, rgba(255,255,255,0), rgba(190,235,255,.78), rgba(255,255,255,0));
-      filter: blur(1px);
+      background: linear-gradient(90deg, rgba(255,255,255,0), rgba(135,211,255,.62), rgba(255,255,255,0));
+      filter: blur(2px);
       pointer-events: none;
     }
 
@@ -1374,7 +1397,7 @@
     <section id="tutorialScreen" class="screen hidden">
       <div class="tutorial-card">
         <h2 class="screen-title visually-hidden">HOW TO PLAY</h2>
-        <div class="how-title-clean" aria-hidden="true">HOW TO<br>PLAY</div>
+        <div class="how-title-clean" aria-hidden="true"><span>HOW TO</span><br><span>PLAY</span></div>
         <img class="how-title-image" src="assets/ui/how_to_play_title_mobile.png?v=20260515-mobile" alt="HOW TO PLAY" decoding="async" draggable="false">
         <p class="copy">Roll softly over warm and puffy spots.</p>
         <div class="tutorial-steps glass-card">
